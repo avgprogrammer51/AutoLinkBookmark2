@@ -1,0 +1,33 @@
+name: Build APK with Maven
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      
+    - uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Install Android SDK
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y android-sdk
+        echo "ANDROID_HOME=/usr/lib/android-sdk" >> $GITHUB_ENV
+    
+    - name: Build with Maven
+      run: mvn clean package android:apk
+      
+    - uses: actions/upload-artifact@v4
+      with:
+        name: AutoLinkBookmark-APK
+        path: target/*.apk
